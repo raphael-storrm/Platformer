@@ -1,0 +1,26 @@
+{
+  "name": "2d-platformer-game",
+  "version": "1.0.0",
+  "description": "A single-player 2D platformer game with collectible coins, hazards, and a finish flag.",
+  "main": "src/main.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && node dist/main.js"
+  },
+  "dependencies": {
+    "typescript": "^4.5.0"
+  },
+  "devDependencies": {
+    "ts-loader": "^9.2.6",
+    "webpack": "^5.64.0",
+    "webpack-cli": "^4.9.1"
+  },
+  "keywords": [
+    "2D",
+    "platformer",
+    "game",
+    "typescript"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
