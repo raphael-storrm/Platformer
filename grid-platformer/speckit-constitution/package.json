@@ -1,0 +1,16 @@
+{
+  "name": "speckit-constitution",
+  "version": "1.0.0",
+  "description": "A simple game project with player movement, collision detection, and coin collection.",
+  "main": "src/game.js",
+  "scripts": {
+    "start": "live-server src",
+    "build": "echo 'No build step required for this project.'"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "live-server": "^1.2.1"
+  },
+  "author": "",
+  "license": "ISC"
+}
