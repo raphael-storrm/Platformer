@@ -1,0 +1,19 @@
+{
+  "name": "phaser-game",
+  "version": "1.0.0",
+  "description": "A simple Phaser game using Vite and vanilla JavaScript.",
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "phaser": "^3.60.0"
+  },
+  "devDependencies": {
+    "vite": "^4.0.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
