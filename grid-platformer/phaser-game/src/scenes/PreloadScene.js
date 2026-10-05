@@ -1,15 +1,21 @@
 import Phaser from 'phaser';
+import { showGameError } from '../utils/showGameError.js';
 
 export default class PreloadScene extends Phaser.Scene {
     constructor() { super('PreloadScene'); }
 
     create() {
-        const graphics = this.make.graphics({ x: 0, y: 0 }, false);
+        let graphics;
+        const generated = [];
+        try {
+        graphics = this.make.graphics({ x: 0, y: 0 }, false);
         const texture = (key, draw) => {
             if (this.textures.exists(key)) return;
             graphics.clear();
             draw();
             graphics.generateTexture(key, 32, 32);
+            if (!this.textures.exists(key)) throw new Error(`Could not generate texture: ${key}`);
+            generated.push(key);
         };
         texture('tiles', () => {
             graphics.fillStyle(0x436b50).fillRect(0, 0, 32, 32);
@@ -30,7 +36,14 @@ export default class PreloadScene extends Phaser.Scene {
             graphics.fillStyle(0xffffff).fillRect(5, 0, 3, 32);
             graphics.fillStyle(0x52d7bc).fillRect(8, 0, 22, 16);
         });
-        graphics.destroy();
+        } catch (error) {
+            for (const key of generated) this.textures.remove(key);
+            console.error('Texture generation failed:', error);
+            showGameError(this, 'Graphics could not be created. Try reloading the page.');
+            return;
+        } finally {
+            if (graphics) graphics.destroy();
+        }
         this.scene.start('GameScene');
     }
 }
