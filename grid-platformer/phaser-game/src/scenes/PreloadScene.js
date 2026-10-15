@@ -32,6 +32,10 @@ export default class PreloadScene extends Phaser.Scene {
         texture('spike', () => {
             graphics.fillStyle(0xd94c62).fillTriangle(0, 32, 16, 5, 32, 32);
         });
+        texture('checkpoint', () => {
+            graphics.fillStyle(0xffffff).fillRect(5, 0, 3, 32);
+            graphics.fillStyle(0xffcf45).fillRect(8, 0, 20, 14);
+        });
         texture('flag', () => {
             graphics.fillStyle(0xffffff).fillRect(5, 0, 3, 32);
             graphics.fillStyle(0x52d7bc).fillRect(8, 0, 22, 16);

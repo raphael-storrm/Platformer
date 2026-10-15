@@ -52,4 +52,13 @@ npm run build
 - Static collision bodies are set up for solid tiles, while overlap detection is implemented for coins, spikes, and the flag.
 - The game features pixel-style textures that are generated locally.
 
-Enjoy playing the game!
+## Levels, Checkpoints, and Sound
+
+- Three levels progress through Next Level; Play Again after the final level starts over.
+- Move with A/D or arrow keys and jump with Space.
+- Yellow flags are checkpoints; they turn green when activated.
+- Death returns you to the latest checkpoint and preserves collected coins.
+- Before a checkpoint, death resets the level and coins.
+- R resets the current level, including its checkpoint and coins.
+- Jump, coin, and victory sounds are synthesized locally. Browser audio starts after user interaction.
+- Uncheck Sound to mute. No audio files or external services are required.

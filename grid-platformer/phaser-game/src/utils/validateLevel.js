@@ -8,7 +8,7 @@ export function validateLevel(rows, width, height) {
             throw new Error(`Level row ${y + 1} must have ${width} tiles.`);
         }
         for (const symbol of row) {
-            if (!'#PCS F.'.replace(' ', '').includes(symbol)) {
+            if (!'#PCSKF.'.includes(symbol)) {
                 throw new Error(`Unknown level symbol ${JSON.stringify(symbol)} in row ${y + 1}.`);
             }
             if (symbol === 'P') spawns++;
