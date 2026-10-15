@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { showGameError } from '../utils/showGameError.js';
 import { levelThemes } from '../utils/levelThemes.js';
+import { characters, drawCharacter } from '../utils/characters.js';
 
 export default class PreloadScene extends Phaser.Scene {
     constructor() { super('PreloadScene'); }
@@ -27,13 +28,23 @@ export default class PreloadScene extends Phaser.Scene {
             } else if (index === 1) {
                 graphics.fillTriangle(7, 21, 12, 10, 16, 21);
                 graphics.fillRect(23, 25, 3, 5);
-            } else {
+            } else if (index === 2) {
                 graphics.fillRect(0, 16, 32, 2).fillRect(15, 6, 2, 10).fillRect(6, 18, 2, 14);
+            } else if (index === 3) {
+                graphics.fillStyle(theme.edge).fillCircle(7, 7, 7).fillCircle(23, 7, 7);
+                graphics.fillStyle(theme.detail).fillRect(4, 22, 24, 3);
+            } else {
+                graphics.fillStyle(0xfff4dc).fillRect(0, 0, 32, 9);
+                graphics.fillStyle(0x55c8b4).fillRect(5, 3, 4, 2);
+                graphics.fillStyle(0xee628e).fillRect(20, 5, 5, 2);
+                graphics.fillStyle(0xffd451).fillRect(14, 1, 2, 4);
+                graphics.fillStyle(theme.detail).fillRect(0, 20, 32, 3);
             }
         }));
-        texture('player', () => {
-            graphics.fillStyle(0xf06b65).fillRect(5, 2, 22, 30);
-            graphics.fillStyle(0xffffff).fillRect(17, 7, 6, 6);
+        characters.forEach(character => {
+            for (let frame = 0; frame < 2; frame++) {
+                texture(`player-${character.id}-${frame}`, () => drawCharacter(graphics, character.id, frame));
+            }
         });
         texture('enemy', () => {
             graphics.fillStyle(0xffffff).fillRect(3, 8, 26, 24);

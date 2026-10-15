@@ -5,6 +5,8 @@ import { showGameError } from '../utils/showGameError.js';
 import { playEffect } from '../utils/playEffect.js';
 import { drawLevelBackground } from '../utils/levelThemes.js';
 import { startBackgroundMusic } from '../utils/backgroundMusic.js';
+import { characters } from '../utils/characters.js';
+import { bindSoundToggle } from '../utils/bindSoundToggle.js';
 
 export default class GameScene extends Phaser.Scene {
     constructor() { super('GameScene'); }
@@ -13,6 +15,8 @@ export default class GameScene extends Phaser.Scene {
         this.levelIndex = Number.isInteger(data.levelIndex) && data.levelIndex >= 0 &&
             data.levelIndex < levels.length ? data.levelIndex : 0;
         this.checkpoint = data.checkpoint || null;
+        this.character = characters.some(c => c.id === data.character)
+            ? data.character : this.registry.get('character') || 'unicorn';
         this.collected = new Set(data.collected || []);
         this.deaths = Number.isInteger(data.deaths) ? Phaser.Math.Clamp(data.deaths, 0, 2) : 0;
     }
@@ -72,7 +76,7 @@ export default class GameScene extends Phaser.Scene {
                 if (this.checkpoint?.x === px && this.checkpoint?.y === py) checkpoint.setTint(0x66ff99);
             }
             if (symbol === 'P') {
-                this.player = this.physics.add.sprite(this.checkpoint?.x ?? px, this.checkpoint?.y ?? py, 'player');
+                this.player = this.physics.add.sprite(this.checkpoint?.x ?? px, this.checkpoint?.y ?? py, `player-${this.character}-0`);
                 this.player.body.setSize(22, 30).setOffset(5, 2);
                 this.player.body.setMaxVelocity(300, 600);
                 this.player.setCollideWorldBounds(true);
@@ -82,6 +86,10 @@ export default class GameScene extends Phaser.Scene {
         this.counter = this.add.text(20, 20, '', { fontSize: '20px', color: theme.ink });
         this.status = this.add.text(20, 50, this.checkpoint ? 'Checkpoint saved' : theme.name, { fontSize: '18px', color: theme.accent });
         this.refreshCounter();
+        this.add.text(20, 82, 'Back to Character Select', {
+            fontSize: '16px', color: '#ffffff', backgroundColor: '#243f4d',
+            padding: { x: 10, y: 7 }
+        }).setInteractive({ useHandCursor: true }).on('pointerdown', () => this.backToCharacterSelect());
         this.physics.add.collider(this.player, this.platforms);
         this.physics.add.overlap(this.player, this.coins, (_, coin) => {
             if (!coin.active || this.finished || this.restarting) return;
@@ -107,13 +115,7 @@ export default class GameScene extends Phaser.Scene {
         this.keys = this.input.keyboard.addKeys({
             left: 'LEFT', right: 'RIGHT', a: 'A', d: 'D', jump: 'SPACE', restart: 'R'
         });
-        const soundToggle = document.getElementById('sound-enabled');
-        if (soundToggle) {
-            this.sound.mute = !soundToggle.checked;
-            const changeSound = () => { this.sound.mute = !soundToggle.checked; };
-            soundToggle.addEventListener('change', changeSound);
-            this.events.once('shutdown', () => soundToggle.removeEventListener('change', changeSound));
-        }
+        bindSoundToggle(this);
         this.stopMusic = startBackgroundMusic(this, this.levelIndex);
     }
 
@@ -126,9 +128,9 @@ export default class GameScene extends Phaser.Scene {
         this.finished = true;
         this.physics.pause();
         this.stopMusic?.();
-        playEffect(this, 'win');
         const last = this.levelIndex === levels.length - 1;
-        this.add.rectangle(480, 290, 460, 190, 0x10202a, 0.96);
+        playEffect(this, last ? 'gameWin' : 'stageWin');
+        this.add.rectangle(480, 320, 460, 270, 0x10202a, 0.96);
         this.add.text(480, 260, `${last ? 'All levels complete!' : 'Level complete!'}\nCoins: ${this.score}/${this.totalCoins}`, {
             fontSize: '28px', align: 'center', color: '#ffffff'
         }).setOrigin(0.5);
@@ -139,13 +141,25 @@ export default class GameScene extends Phaser.Scene {
             levelIndex: last ? 0 : this.levelIndex + 1,
             deaths: last ? 0 : this.deaths
         }));
+        this.add.text(480, 400, 'Back to Character Select', {
+            fontSize: '18px', color: '#ffffff', backgroundColor: '#243f4d',
+            padding: { x: 14, y: 10 }
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => this.backToCharacterSelect());
+    }
+
+    backToCharacterSelect() {
+        if (this.restarting) return;
+        this.restarting = true;
+        this.physics.pause();
+        this.scene.start('MenuScene', { character: this.character });
     }
 
     transition(data) {
         if (this.restarting) return;
         this.restarting = true;
         this.physics.pause();
-        this.scene.restart(data);
+        this.scene.restart({ ...data, character: this.character });
     }
 
     restartGame(fromDeath = false) {
@@ -159,15 +173,22 @@ export default class GameScene extends Phaser.Scene {
 
     die() {
         if (this.finished || this.restarting) return;
+        this.restarting = true;
+        this.finished = true;
+        this.physics.pause();
+        this.stopMusic?.();
+        this.player.setTint(0xf06b65);
+        playEffect(this, 'death');
         this.deaths++;
-        if (this.deaths >= 3) {
-            this.restarting = true;
-            this.finished = true;
-            this.physics.pause();
-            this.scene.start('MenuScene', { gameOver: true, reached: this.levelIndex + 1 });
-            return;
-        }
-        this.restartGame(true);
+        // Let the short death cue finish before scene shutdown cancels effects.
+        this.time.delayedCall(220, () => {
+            if (this.deaths >= 3) {
+                this.scene.start('MenuScene', { gameOver: true, reached: this.levelIndex + 1, character: this.character });
+                return;
+            }
+            this.restarting = false;
+            this.restartGame(true);
+        });
     }
 
     update() {
@@ -186,6 +207,10 @@ export default class GameScene extends Phaser.Scene {
         const left = this.keys.left.isDown || this.keys.a.isDown;
         const right = this.keys.right.isDown || this.keys.d.isDown;
         this.player.setVelocityX((Number(right) - Number(left)) * 220);
+        const moving = left !== right;
+        const frame = moving && this.player.body.blocked.down ? Math.floor(this.time.now / 130) % 2 : 0;
+        this.player.setTexture(`player-${this.character}-${frame}`);
+        if (moving) this.player.setFlipX(left);
         if (Phaser.Input.Keyboard.JustDown(this.keys.jump) && this.player.body.blocked.down) {
             this.player.setVelocityY(-420);
             playEffect(this, 'jump');
