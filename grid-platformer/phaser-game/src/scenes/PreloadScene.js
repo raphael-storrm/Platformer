@@ -25,6 +25,11 @@ export default class PreloadScene extends Phaser.Scene {
             graphics.fillStyle(0xf06b65).fillRect(5, 2, 22, 30);
             graphics.fillStyle(0xffffff).fillRect(17, 7, 6, 6);
         });
+        texture('enemy', () => {
+            graphics.fillStyle(0xb88cff).fillRect(3, 8, 26, 24);
+            graphics.fillStyle(0xffffff).fillRect(6, 12, 7, 7).fillRect(19, 12, 7, 7);
+            graphics.fillStyle(0x182b35).fillRect(8, 14, 3, 4).fillRect(21, 14, 3, 4);
+        });
         texture('coin', () => {
             graphics.fillStyle(0xffcf45).fillCircle(16, 16, 10);
             graphics.fillStyle(0xffed9b).fillRect(14, 9, 4, 14);
@@ -48,6 +53,6 @@ export default class PreloadScene extends Phaser.Scene {
         } finally {
             if (graphics) graphics.destroy();
         }
-        this.scene.start('GameScene');
+        this.scene.start('MenuScene');
     }
 }

@@ -54,6 +54,13 @@ npm run build
 
 ## Levels, Checkpoints, and Sound
 
+- The opening screen shows controls; click Start Game or press Enter.
+- Enemies patrol their own platforms and reverse at the ends. Any contact costs one life.
+- Three lives are shared across the whole run, including level changes.
+- Spikes, enemies, and falls count as deaths. Checkpoints preserve respawns, not lives.
+- After the third death, Game Over offers Try Again from level one with three lives.
+- R resets the current level without restoring lives.
+
 - Three levels progress through Next Level; Play Again after the final level starts over.
 - Move with A/D or arrow keys and jump with Space.
 - Yellow flags are checkpoints; they turn green when activated.

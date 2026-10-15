@@ -8,11 +8,16 @@ export function validateLevel(rows, width, height) {
             throw new Error(`Level row ${y + 1} must have ${width} tiles.`);
         }
         for (const symbol of row) {
-            if (!'#PCSKF.'.includes(symbol)) {
+            if (!'#PCSEKF.'.includes(symbol)) {
                 throw new Error(`Unknown level symbol ${JSON.stringify(symbol)} in row ${y + 1}.`);
             }
             if (symbol === 'P') spawns++;
         }
     });
     if (spawns !== 1) throw new Error(`Level must have exactly one player spawn (P); found ${spawns}.`);
+    rows.forEach((row, y) => [...row].forEach((symbol, x) => {
+        if (symbol === 'E' && rows[y + 1]?.[x] !== '#') {
+            throw new Error(`Enemy at row ${y + 1}, column ${x + 1} must stand on a solid platform.`);
+        }
+    }));
 }

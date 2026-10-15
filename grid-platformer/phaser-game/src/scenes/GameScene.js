@@ -12,6 +12,7 @@ export default class GameScene extends Phaser.Scene {
             data.levelIndex < levels.length ? data.levelIndex : 0;
         this.checkpoint = data.checkpoint || null;
         this.collected = new Set(data.collected || []);
+        this.deaths = Number.isInteger(data.deaths) ? Phaser.Math.Clamp(data.deaths, 0, 2) : 0;
     }
 
     create() {
@@ -35,6 +36,7 @@ export default class GameScene extends Phaser.Scene {
         this.spikes = this.physics.add.staticGroup();
         this.flags = this.physics.add.staticGroup();
         this.checkpoints = this.physics.add.staticGroup();
+        this.enemies = this.physics.add.group({ allowGravity: false, immovable: true });
         this.totalCoins = 0;
         level.tiles.forEach((row, y) => [...row].forEach((symbol, x) => {
             const px = x * 32 + 16;
@@ -49,6 +51,19 @@ export default class GameScene extends Phaser.Scene {
             }
             if (symbol === 'S') this.spikes.create(px, py, 'spike').body.setSize(22, 22).setOffset(5, 10);
             if (symbol === 'F') this.flags.create(px, py, 'flag');
+            if (symbol === 'E') {
+                // Patrol the contiguous solid platform beneath this enemy.
+                const support = level.tiles[y + 1];
+                let left = x;
+                let right = x;
+                while (support[left - 1] === '#') left--;
+                while (support[right + 1] === '#') right++;
+                const enemy = this.enemies.create(px, py, 'enemy');
+                enemy.body.setSize(26, 24).setOffset(3, 8);
+                enemy.setData('left', left * 32 + 16);
+                enemy.setData('right', right * 32 + 16);
+                enemy.setVelocityX(left === right ? 0 : 65 + this.levelIndex * 15);
+            }
             if (symbol === 'K') {
                 const checkpoint = this.checkpoints.create(px, py, 'checkpoint');
                 if (this.checkpoint?.x === px && this.checkpoint?.y === py) checkpoint.setTint(0x66ff99);
@@ -74,8 +89,9 @@ export default class GameScene extends Phaser.Scene {
             playEffect(this, 'coin');
         });
         this.physics.add.overlap(this.player, this.spikes, () => {
-            if (!this.finished) this.restartGame(true);
+            this.die();
         });
+        this.physics.add.overlap(this.player, this.enemies, () => this.die());
         this.physics.add.overlap(this.player, this.checkpoints, (_, checkpoint) => {
             if (this.finished || this.restarting) return;
             if (this.checkpoint?.x === checkpoint.x && this.checkpoint?.y === checkpoint.y) return;
@@ -98,7 +114,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     refreshCounter() {
-        this.counter.setText(`Level ${this.levelIndex + 1}/${levels.length}: ${levels[this.levelIndex].name}    Coins: ${this.score}/${this.totalCoins}`);
+        this.counter.setText(`Level ${this.levelIndex + 1}/${levels.length}: ${levels[this.levelIndex].name}    Coins: ${this.score}/${this.totalCoins}    Lives: ${3 - this.deaths}/3`);
     }
 
     win() {
@@ -114,7 +130,10 @@ export default class GameScene extends Phaser.Scene {
         const next = this.add.text(480, 330, last ? 'Play Again' : 'Next Level', {
             fontSize: '24px', color: '#52d7bc', backgroundColor: '#243f4d', padding: { x: 18, y: 10 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        next.on('pointerdown', () => this.transition({ levelIndex: last ? 0 : this.levelIndex + 1 }));
+        next.on('pointerdown', () => this.transition({
+            levelIndex: last ? 0 : this.levelIndex + 1,
+            deaths: last ? 0 : this.deaths
+        }));
     }
 
     transition(data) {
@@ -127,15 +146,38 @@ export default class GameScene extends Phaser.Scene {
     restartGame(fromDeath = false) {
         this.transition({
             levelIndex: this.levelIndex,
+            deaths: this.deaths,
             checkpoint: fromDeath ? this.checkpoint : null,
             collected: fromDeath && this.checkpoint ? [...this.collected] : []
         });
+    }
+
+    die() {
+        if (this.finished || this.restarting) return;
+        this.deaths++;
+        if (this.deaths >= 3) {
+            this.restarting = true;
+            this.finished = true;
+            this.physics.pause();
+            this.scene.start('MenuScene', { gameOver: true, reached: this.levelIndex + 1 });
+            return;
+        }
+        this.restartGame(true);
     }
 
     update() {
         if (!this.keys || this.restarting) return;
         if (Phaser.Input.Keyboard.JustDown(this.keys.restart)) { this.restartGame(); return; }
         if (this.finished) return;
+        this.enemies.children.iterate(enemy => {
+            const left = enemy.getData('left');
+            const right = enemy.getData('right');
+            const speed = 65 + this.levelIndex * 15;
+            if (left === right) return;
+            if (enemy.x >= right && enemy.body.velocity.x > 0) enemy.setVelocityX(-speed);
+            else if (enemy.x <= left && enemy.body.velocity.x < 0) enemy.setVelocityX(speed);
+            enemy.setFlipX(enemy.body.velocity.x < 0);
+        });
         const left = this.keys.left.isDown || this.keys.a.isDown;
         const right = this.keys.right.isDown || this.keys.d.isDown;
         this.player.setVelocityX((Number(right) - Number(left)) * 220);
@@ -143,6 +185,6 @@ export default class GameScene extends Phaser.Scene {
             this.player.setVelocityY(-420);
             playEffect(this, 'jump');
         }
-        if (this.player.y > 680) this.restartGame(true);
+        if (this.player.y > 680) this.die();
     }
 }
