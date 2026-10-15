@@ -3,6 +3,8 @@ import { levels } from '../utils/levelData.js';
 import { validateLevel } from '../utils/validateLevel.js';
 import { showGameError } from '../utils/showGameError.js';
 import { playEffect } from '../utils/playEffect.js';
+import { drawLevelBackground } from '../utils/levelThemes.js';
+import { startBackgroundMusic } from '../utils/backgroundMusic.js';
 
 export default class GameScene extends Phaser.Scene {
     constructor() { super('GameScene'); }
@@ -30,6 +32,7 @@ export default class GameScene extends Phaser.Scene {
             return;
         }
         this.physics.resume();
+        const theme = drawLevelBackground(this, this.levelIndex);
         this.physics.world.setBounds(5, 0, this.scale.width - 10, this.scale.height, true, true, true, false);
         this.platforms = this.physics.add.staticGroup();
         this.coins = this.physics.add.staticGroup();
@@ -41,7 +44,7 @@ export default class GameScene extends Phaser.Scene {
         level.tiles.forEach((row, y) => [...row].forEach((symbol, x) => {
             const px = x * 32 + 16;
             const py = y * 32 + 16;
-            if (symbol === '#') this.platforms.create(px, py, 'tiles');
+            if (symbol === '#') this.platforms.create(px, py, `tiles-${this.levelIndex}`);
             if (symbol === 'C') {
                 this.totalCoins++;
                 const coin = this.coins.create(px, py, 'coin');
@@ -58,7 +61,7 @@ export default class GameScene extends Phaser.Scene {
                 let right = x;
                 while (support[left - 1] === '#') left--;
                 while (support[right + 1] === '#') right++;
-                const enemy = this.enemies.create(px, py, 'enemy');
+                const enemy = this.enemies.create(px, py, 'enemy').setTint(theme.enemy);
                 enemy.body.setSize(26, 24).setOffset(3, 8);
                 enemy.setData('left', left * 32 + 16);
                 enemy.setData('right', right * 32 + 16);
@@ -76,8 +79,8 @@ export default class GameScene extends Phaser.Scene {
             }
         }));
         this.score = this.collected.size;
-        this.counter = this.add.text(20, 20, '', { fontSize: '20px', color: '#ffffff' });
-        this.status = this.add.text(20, 50, this.checkpoint ? 'Checkpoint saved' : '', { fontSize: '18px', color: '#82edb2' });
+        this.counter = this.add.text(20, 20, '', { fontSize: '20px', color: theme.ink });
+        this.status = this.add.text(20, 50, this.checkpoint ? 'Checkpoint saved' : theme.name, { fontSize: '18px', color: theme.accent });
         this.refreshCounter();
         this.physics.add.collider(this.player, this.platforms);
         this.physics.add.overlap(this.player, this.coins, (_, coin) => {
@@ -111,6 +114,7 @@ export default class GameScene extends Phaser.Scene {
             soundToggle.addEventListener('change', changeSound);
             this.events.once('shutdown', () => soundToggle.removeEventListener('change', changeSound));
         }
+        this.stopMusic = startBackgroundMusic(this, this.levelIndex);
     }
 
     refreshCounter() {
@@ -121,6 +125,7 @@ export default class GameScene extends Phaser.Scene {
         if (this.finished || this.restarting) return;
         this.finished = true;
         this.physics.pause();
+        this.stopMusic?.();
         playEffect(this, 'win');
         const last = this.levelIndex === levels.length - 1;
         this.add.rectangle(480, 290, 460, 190, 0x10202a, 0.96);

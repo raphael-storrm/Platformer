@@ -54,6 +54,11 @@ npm run build
 
 ## Levels, Checkpoints, and Sound
 
+- Each level has a distinct setting: Meadow, Crystal Cavern, and Sunset Summit.
+- Platforms, enemies, scenery, and HUD colors match each setting.
+- Quiet synthesized background music changes melody by level, stops at victory or game over, and follows the Sound checkbox.
+- Music starts after browser audio is unlocked by user interaction. No audio downloads are required.
+
 - The opening screen shows controls; click Start Game or press Enter.
 - Enemies patrol their own platforms and reverse at the ends. Any contact costs one life.
 - Three lives are shared across the whole run, including level changes.
