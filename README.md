@@ -1,64 +1,43 @@
-# 2D Platformer Game
+# Grid Platformer
 
-## Overview
-This is a simple single-player 2D platformer game built on a tile grid. The player navigates through levels, collects coins, avoids hazards, and aims to reach the finish flag.
+A desktop browser platformer with five themed stages, three selectable characters, checkpoints, patrolling enemies, three lives per run, and locally synthesized audio.
 
-## Features
-- Player movement controls (left, right, jump)
-- Collectible coins
-- Hazards (e.g., spikes)
-- Finish flag to complete the level
-- Colorful pixel art style
+## Run the game
 
-## Project Structure
-```
-2d-platformer-game
-├── src
-│   ├── assets
-│   │   ├── audio          # Audio files for sound effects and background music
-│   │   ├── levels         # Level design files with tile grid layouts
-│   │   └── sprites        # Image files for player, coins, hazards, and flags
-│   ├── components
-│   │   ├── player.ts      # Player class for movement and jumping
-│   │   ├── coin.ts        # Coin class for collection mechanics
-│   │   ├── hazard.ts      # Hazard class for collision detection
-│   │   └── flag.ts        # Flag class for level completion
-│   ├── systems
-│   │   ├── movement.ts    # Functions for handling player movement
-│   │   ├── collision.ts    # Functions for collision detection
-│   │   └── rendering.ts    # Functions for rendering game elements
-│   ├── main.ts            # Entry point of the game
-│   └── types
-│       └── index.ts       # Types and interfaces used in the project
-├── package.json           # npm configuration file
-├── tsconfig.json          # TypeScript configuration file
-└── README.md              # Project documentation
+Prerequisites: Node.js 22 or newer, npm, and a desktop browser with a keyboard.
+
+```sh
+git clone https://github.com/raphael-storrm/Platformer.git
+cd Platformer/grid-platformer/phaser-game
+npm ci
+npm run dev
 ```
 
-## Setup Instructions
-1. Clone the repository:
-   ```
-   git clone <repository-url>
-   ```
-2. Navigate to the project directory:
-   ```
-   cd 2d-platformer-game
-   ```
-3. Install dependencies:
-   ```
-   npm install
-   ```
-4. Run the game:
-   ```
-   npm start
-   ```
+Open the Local URL printed by Vite. The default port is 3000; if occupied, Vite selects another. Stop the server with Control+C.
 
-## Gameplay
-- Use the left and right arrow keys (or A/D) to move the player.
-- Press the spacebar to jump.
-- Collect coins to increase your score.
-- Avoid hazards to prevent losing the game.
-- Reach the finish flag to complete the level.
+The working application is in grid-platformer/phaser-game. Other folders are earlier prototypes. See the [app README](grid-platformer/phaser-game/README.md) for controls and source details.
 
-## Contributing
-Feel free to submit issues or pull requests for improvements or bug fixes.
+## Build and preview
+
+Run from grid-platformer/phaser-game:
+
+```sh
+npm run build
+npm run preview
+```
+
+Build output is in dist. Audio starts after interaction. Progress is held only for the current page session; refreshing resets it.
+
+## Project artifacts
+
+- [Specification](grid-platformer/specs/001-grid-platformer/spec.md)
+- [Technical plan](grid-platformer/specs/001-grid-platformer/plan.md)
+- [Tasks and remaining work](grid-platformer/specs/001-grid-platformer/tasks.md)
+
+These artifacts describe the current five-level game and were reconstructed retrospectively. They do not claim that every feature was specified before development.
+
+The test log, evidence, analysis, and presentation are supplied separately in the submission-materials ZIP.
+
+## Verification status
+
+The documented clean install and build passed. Eight unit tests and twelve targeted browser checks passed using the separately archived test harness. A keyboard-only attempt completed the first two stages before a death in stage three; full five-stage normal-control completion and a human usability session remain unverified. Three development-tool dependency advisories are documented in the separate test log.

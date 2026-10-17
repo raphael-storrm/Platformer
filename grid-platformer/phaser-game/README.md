@@ -1,84 +1,55 @@
-# Phaser Game
+# Grid Platformer
 
-This project is a simple 2D game built using Vite, vanilla JavaScript, and Phaser with Arcade Physics. The game features a fixed 960 by 640 game area that scales to fit the browser, utilizing 32-pixel tiles for the level design.
+The working game uses Phaser, JavaScript, and Vite. It runs locally with no backend, account, API keys, or downloaded game assets.
 
-## Project Structure
+## Setup
 
-```
-phaser-game
-├── src
-│   ├── index.html        # Main HTML file for the game
-│   ├── main.js           # Entry point of the application
-│   ├── assets            # Directory for game assets
-│   │   └── textures      # Locally generated pixel-style textures
-│   ├── scenes            # Game scenes
-│   │   ├── BootScene.js  # Handles initial loading of assets
-│   │   ├── GameScene.js  # Main game logic and level setup
-│   │   └── PreloadScene.js # Preloads assets before the game starts
-│   └── utils             # Utility functions and data
-│       └── levelData.js  # Defines the layout of the game level
-├── package.json          # npm configuration file
-├── vite.config.js        # Vite configuration file
-└── README.md             # Project documentation
-```
+Prerequisites: Node.js 22+, npm, a desktop browser, and keyboard.
 
-## Installation
+From the repository root:
 
-To install the project dependencies, run:
-
-```
-npm install
-```
-
-## Development
-
-To start the development server, use:
-
-```
+```sh
+cd grid-platformer/phaser-game
+npm ci
 npm run dev
 ```
 
+Open the Local URL printed in the terminal. Control+C stops the server.
+
 ## Build
 
-To build the project for production, run:
-
-```
+```sh
 npm run build
+npm run preview
 ```
 
-## Game Details
+Vite serves src/index.html and writes production files to dist.
 
-- The game uses a small array of tile characters to define the level layout.
-- Static collision bodies are set up for solid tiles, while overlap detection is implemented for coins, spikes, and the flag.
-- The game features pixel-style textures that are generated locally.
+## Play
 
-## Levels, Checkpoints, and Sound
+- Choose Unicorn, Leprechaun, or Skeleton by clicking or pressing 1/2/3; Enter starts.
+- A/D or arrows move; Space jumps while grounded.
+- Yellow flags save checkpoints. Death afterward preserves collected coins.
+- Spikes, enemies, and falls cost one life. Three deaths end the run.
+- Green flags advance stages; coins are optional.
+- R resets the current stage without restoring lives.
+- Back to Character Select abandons the run. Starting again restores three lives.
+- Sound toggles music and effects.
 
-- Distinct cues announce stage completion, finishing Candy Land, and game over.
-- Back to Character Select is available during play, on completion screens, and on Game Over.
-- Returning to selection abandons the current run; starting again resets lives, coins, and checkpoints.
-- The Sound checkbox controls music and effects on gameplay and menu screens.
+Stages: First Steps (Meadow), Up and Over (Crystal Cavern), Sunset Summit, Cloudy Clouds, Candy Land. Characters share the same movement and collision rules.
 
-- Five settings in order: Meadow, Crystal Cavern, Sunset Summit, Cloudy Clouds, and Candy Land.
-- Choose Unicorn, Leprechaun, or Skeleton on the opening screen by clicking a sprite or pressing 1/2/3.
-- Characters have identical movement and collision sizes. Your selection persists across deaths, levels, and retries.
-- Platforms, enemies, scenery, and HUD colors match each setting.
-- Quiet synthesized background music changes melody by level, stops at victory or game over, and follows the Sound checkbox.
-- Music starts after browser audio is unlocked by user interaction. No audio downloads are required.
+## Source
 
-- The opening screen shows controls; click Start Game or press Enter.
-- Enemies patrol their own platforms and reverse at the ends. Any contact costs one life.
-- Three lives are shared across the whole run, including level changes.
-- Spikes, enemies, and falls count as deaths. Checkpoints preserve respawns, not lives.
-- After the third death, Game Over offers Try Again from level one with three lives.
-- R resets the current level without restoring lives.
+- src/main.js registers scenes and Arcade Physics.
+- src/scenes handles setup, character selection, gameplay, and results.
+- src/utils/levelData.js defines the five 30x20 tile layouts.
+- src/utils/validateLevel.js validates level structure.
+- src/utils/characters.js and levelThemes.js draw local sprites and scenery.
+- src/utils/backgroundMusic.js and playEffect.js synthesize audio.
 
-- Five levels progress through Next Level; Play Again after Candy Land starts over.
-- Stage music uses a meadow flute, cave echoes, warm summit tones, airy cloud bells, and a bouncy candy music box.
-- Move with A/D or arrow keys and jump with Space.
-- Yellow flags are checkpoints; they turn green when activated.
-- Death returns you to the latest checkpoint and preserves collected coins.
-- Before a checkpoint, death resets the level and coins.
-- R resets the current level, including its checkpoint and coins.
-- Jump, coin, and victory sounds are synthesized locally. Browser audio starts after user interaction.
-- Uncheck Sound to mute. No audio files or external services are required.
+Desktop keyboard play is the target. No touch controls or persistent saves are included. Refreshing abandons the run, and character selection lasts only for the page session.
+
+## Project artifacts
+
+See the [specification](../specs/001-grid-platformer/spec.md), [plan](../specs/001-grid-platformer/plan.md), and [tasks](../specs/001-grid-platformer/tasks.md).
+The test harness and other submission materials are distributed in a separate ZIP; test commands are not installed in this app folder.
